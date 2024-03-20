@@ -35,12 +35,14 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     last_name=models.CharField(max_length=30,blank=True)
     place=models.CharField(max_length=30,blank=True)
     phone_number=models.CharField(max_length=15,blank=True)
-    age=models.IntegerField(max_length=100,blank=True)
+    age = models.IntegerField(blank=True, null=True)
+    exp = models.IntegerField(default=0,blank=True)
+    specialisation=models.CharField(max_length=100,blank=True)
     is_active=models.BooleanField(default=True)
     is_staff=models.BooleanField(default=False)
     date_joined=models.DateTimeField(default=timezone.now)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='patient')
-
+    is_approved = models.BooleanField(default=False)
 
     objects=CustomUserManager()
 
@@ -64,3 +66,8 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     def __str__(self):
         return self.email
 
+class Document(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    experience_certificate = models.ImageField(upload_to='documents/')
+    mbbs_certificate = models.ImageField(upload_to='documents/')
+    # Add more fields for other certificates/documents as needed
