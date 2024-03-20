@@ -62,6 +62,7 @@ class DocSignupView(APIView):
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+             
         else:
             print(serializer.errors) 
         return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -43,6 +43,7 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     date_joined=models.DateTimeField(default=timezone.now)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='patient')
     is_approved = models.BooleanField(default=False)
+    otp = models.CharField(max_length=6, null=True, blank=True)
 
     objects=CustomUserManager()
 
@@ -71,3 +72,5 @@ class Document(models.Model):
     experience_certificate = models.ImageField(upload_to='documents/')
     mbbs_certificate = models.ImageField(upload_to='documents/')
     # Add more fields for other certificates/documents as needed
+
+
