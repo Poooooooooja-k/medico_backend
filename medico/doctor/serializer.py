@@ -40,3 +40,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         Document.objects.create(user=user, **document_data)
 
         return user
+
+class VerifyUserSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField()

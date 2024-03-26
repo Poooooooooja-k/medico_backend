@@ -44,11 +44,19 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'djoser',
+    'corsheaders',
     'patient',
     'doctor',
+    'adminn',
+    'social_django',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
 ]
+AUTH_USER_MODEL='patient.CustomUser'
 
 MIDDLEWARE = [
+    'social_django.middleware.SocialAuthExceptionMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -56,9 +64,37 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+  
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+]
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 ROOT_URLCONF = 'medico.urls'
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_HEADERS = [
+    'Content-Type',
+    'content-disposition',
+]
+CORS_ALLOWED_ORIGINS = [
+  
+    'http://localhost:3000',
+]
+
+CORS_ORIGIN_WHITELIST = [
+    'http://google.com',
+    'http://localhost:8000',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:3000'
+
+]
+
 
 TEMPLATES = [
     {
@@ -71,14 +107,16 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect'
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'medico.wsgi.application'
+# WSGI_APPLICATION = 'medico.wsgi.application'
 
-
+ASGI_APPLICATION = 'medico.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -133,7 +171,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
@@ -154,10 +191,22 @@ REST_FRAMEWORK = {
     ),
 }
 
+AUTHENTICATION_BACKENDS={
+    'social_core.backends.google.GoogleAuthz',
+    'django.contrib.auth.backends.ModelBackend'
+}
 
 SIMPLE_JWT={
-    'ACCESS_TOKEN_LIFETIME':timedelta(minutes=30)
+    'ACCESS_TOKEN_LIFETIME':timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME':timedelta(days=1),
+    'AUTH_HEADERS_TYPES':('Bearer',),
 }
+SOCIAL_AUTH_GOOGLE_QAUTH2_KEY= '834636921026-ed9ie2t961p9fksup6llcu1u9eopo5bs.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGEL_QAUTH2_SECRET= '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'
+SOCIAL_AUTH_GOOGLE_QAUTH2_SCOPE= ['https://www.googleapis.com/auth/userinfo.email','https://www.googleapis.com/auth/userinfo.profile','openid']
+SOCIAL_AUTH_GOOGLE_QAUTH2_EXTRA_DATA=['first_name','last_name']
+
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

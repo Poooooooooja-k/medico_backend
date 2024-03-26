@@ -18,6 +18,7 @@ def sent_otp_email(email):
         # Update user object with OTP
         user_obj = CustomUser.objects.get(email=email)
         user_obj.otp = otp
+        print(user_obj.otp,"....................")
         print("kkkkkkk",user_obj)
         user_obj.save()     
         print("OTP email sent successfully")
@@ -32,14 +33,14 @@ def is_valid_email(email):
         return False
     
 
-def send_mail_func(self):
+def send_mail_func(email):
     print("task Started")
+    print(email)
     users = CustomUser.objects.filter(is_superuser=False).order_by('-id').first()
     print(users)
     if users:
         Subject = "Welcome to Medico"
         message = f"Hii {users.first_name} thanks for signing up on Medico "
         from_email = settings.EMAIL_HOST_USER
-        d_mail = EmailMessage(subject=Subject, body= message, from_email=from_email, to=[users.email])
-        d_mail.send(fail_silently=False)
+        send_mail(Subject, message, from_email, [email])
     return 'done'

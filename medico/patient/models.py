@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser,BaseUserManager,Permissi
 from django.utils import timezone
 from datetime import date 
 
+
 # Create your models here.
 class CustomUserManager(BaseUserManager):
     def create_user(self,email,password=None,**extra_fields):
@@ -25,6 +26,8 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("Superuser must have is_superuser=True")
         return self.create_user(email,password,**extra_fields)
     
+
+    
 class CustomUser(AbstractBaseUser,PermissionsMixin):
     ROLE_CHOICES = (
         ('patient', 'Patient'),
@@ -37,7 +40,7 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     phone_number=models.CharField(max_length=15,blank=True)
     age = models.IntegerField(blank=True, null=True)
     exp = models.IntegerField(default=0,blank=True)
-    specialisation=models.CharField(max_length=100,blank=True)
+    specialisation = models.CharField(max_length=100, blank=True)
     is_active=models.BooleanField(default=True)
     is_staff=models.BooleanField(default=False)
     date_joined=models.DateTimeField(default=timezone.now)
@@ -45,6 +48,7 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     is_approved = models.BooleanField(default=False)
     otp = models.CharField(max_length=6, null=True, blank=True)
 
+    
     objects=CustomUserManager()
 
     groups = models.ManyToManyField(
@@ -62,7 +66,7 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     )
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['first_name','last_name']
 
     def __str__(self):
         return self.email
@@ -74,3 +78,7 @@ class Document(models.Model):
     # Add more fields for other certificates/documents as needed
 
 
+class specialisation(models.Model):
+    name=models.ForeignKey(' CustomUser',on_delete=models.CASCADE)
+    is_active=models.BooleanField(default=True)
+    

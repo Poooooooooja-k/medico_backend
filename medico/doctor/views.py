@@ -2,11 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions,status
 from .serializer import *
-from patient.models import *
+from .docemail import *
 from rest_framework.exceptions import ValidationError,AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.conf import settings
 from rest_framework.parsers import MultiPartParser, FormParser
+
 
 class DocSignupView(APIView):
     parser_classes = (MultiPartParser, FormParser) 
@@ -59,14 +60,51 @@ class DocSignupView(APIView):
             # Handle case where one or both files are missing
             return Response({'error': 'Both experience certificate and MBBS certificate are required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = CustomUserSerializer(data=request.data)
+        serializer=CustomUserSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-             
+            sent_otp_email(serializer.data['email'])
+            return Response({'message': 'Registration successful. Please check your email for OTP verification.', 'data': serializer.data}, status=status.HTTP_201_CREATED)
         else:
-            print(serializer.errors) 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        
+
+
+        
+class Verify_Otp(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        otp = request.data.get('otp')
+
+        if not email:
+            return Response({'error': 'Email not found. Please Register Again'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not otp:
+            return Response({'error': 'Please enter OTP!'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        data = {'email': email, 'otp': otp}
+        serializer = VerifyUserSerializer(data=data)
+        
+        if serializer.is_valid():
+            user = CustomUser.objects.get(email=email)
+            send_mail_func(serializer.data['email'])
+
+            if not user:
+                return Response({'error': 'User not found'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            if user.otp != otp:
+                return Response({'error': 'Invalid OTP!'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            user.is_verified = True
+            user.otp = None
+            user.save()
+           
+            
+            return Response({'status': 200, 'message': 'Account verified'})
+        else:
+            return Response({'status': 400, 'message': 'Validation error', 'error': serializer.errors})
+
+
 class DocLogin(APIView):
     def post(self,request):
         email=request.data['email']
