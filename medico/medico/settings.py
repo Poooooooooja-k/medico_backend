@@ -44,19 +44,19 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'djoser',
+    # 'djoser',
     'corsheaders',
     'patient',
     'doctor',
     'adminn',
-    'social_django',
-    'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist',
+    # 'social_django',
+    # 'rest_framework_simplejwt',
+    # 'rest_framework_simplejwt.token_blacklist',
 ]
 AUTH_USER_MODEL='patient.CustomUser'
 
 MIDDLEWARE = [
-    'social_django.middleware.SocialAuthExceptionMiddleware',
+    # 'social_django.middleware.SocialAuthExceptionMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -114,16 +114,16 @@ TEMPLATES = [
     },
 ]
 
-# WSGI_APPLICATION = 'medico.wsgi.application'
+WSGI_APPLICATION = 'medico.wsgi.application'
 
-ASGI_APPLICATION = 'medico.asgi.application'
+# ASGI_APPLICATION = 'medico.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': "project2",
+        'NAME': "projecttt",
         "USER": "postgres",
         "PASSWORD": "12345",
         "HOST": "localhost",
@@ -201,10 +201,10 @@ SIMPLE_JWT={
     'REFRESH_TOKEN_LIFETIME':timedelta(days=1),
     'AUTH_HEADERS_TYPES':('Bearer',),
 }
-SOCIAL_AUTH_GOOGLE_QAUTH2_KEY= '834636921026-ed9ie2t961p9fksup6llcu1u9eopo5bs.apps.googleusercontent.com'
-SOCIAL_AUTH_GOOGEL_QAUTH2_SECRET= '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'
-SOCIAL_AUTH_GOOGLE_QAUTH2_SCOPE= ['https://www.googleapis.com/auth/userinfo.email','https://www.googleapis.com/auth/userinfo.profile','openid']
-SOCIAL_AUTH_GOOGLE_QAUTH2_EXTRA_DATA=['first_name','last_name']
+# SOCIAL_AUTH_GOOGLE_QAUTH2_KEY= '834636921026-ed9ie2t961p9fksup6llcu1u9eopo5bs.apps.googleusercontent.com'
+# SOCIAL_AUTH_GOOGEL_QAUTH2_SECRET= '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'
+# SOCIAL_AUTH_GOOGLE_QAUTH2_SCOPE= ['https://www.googleapis.com/auth/userinfo.email','https://www.googleapis.com/auth/userinfo.profile','openid']
+# SOCIAL_AUTH_GOOGLE_QAUTH2_EXTRA_DATA=['first_name','last_name']
 
 
 

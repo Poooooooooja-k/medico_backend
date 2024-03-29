@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, Document,specialisation
+from patient.models import CustomUser, Document,Specialisation
 
 class AdminSerializer(serializers.ModelSerializer):
     class Meta:
@@ -12,5 +12,5 @@ class PatientSerializer(serializers.ModelSerializer):
 
 class SpecialisationSerializer(serializers.ModelSerializer):
     class Meta:
-        model=specialisation
+        model=Specialisation
         fields='__all__'

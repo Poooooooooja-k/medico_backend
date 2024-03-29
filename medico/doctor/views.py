@@ -4,13 +4,15 @@ from rest_framework import permissions,status
 from .serializer import *
 from .docemail import *
 from rest_framework.exceptions import ValidationError,AuthenticationFailed
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.conf import settings
 from rest_framework.parsers import MultiPartParser, FormParser
 
 
 class DocSignupView(APIView):
-    parser_classes = (MultiPartParser, FormParser) 
+    parser_classes = (MultiPartParser, FormParser)
+
     def post(self, request):
         data = request.data
         # Extract data from request
@@ -18,20 +20,28 @@ class DocSignupView(APIView):
         last_name = data.get('last_name')
         email = data.get('email')
         phone_number = data.get('phone_number')
-        specialisation = data.get('specialisation')
+        specialisation_id = data.get('specialisation')
+        new_specialisation = data.get('new_specialisation')
         exp = data.get('exp')
         password = data.get('password')
         confirm_password = data.get('confirm_password')
-        print(first_name)
-        print(last_name)
-        print(email)
+        print(new_specialisation,".........newspecialization.................")
         # Check if passwords match
         if password != confirm_password:
             return Response({'error': 'Passwords do not match'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         # Check if email already exists
         if CustomUser.objects.filter(email=email).exists():
             return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # # Handle new specialisation
+        # if specialisation_id == 'other' and new_specialisation:
+        #     specialisation_instance, created = Specialisation.objects.get_or_create(name=new_specialisation)
+        # else:
+        #     # Existing logic to get specialization by ID
+        specialisation_instance = Specialisation.objects.get(id=specialisation_id)
+        return Response({'error': 'Specialisation does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
 
         # Create CustomUser instance
         custom_user = CustomUser.objects.create(
@@ -39,10 +49,11 @@ class DocSignupView(APIView):
             first_name=first_name,
             last_name=last_name,
             phone_number=phone_number,
-            specialisation=specialisation,
             exp=exp,
-            role='doctor'  # Set role to 'doctor'
+            role='doctor', # Set role to 'doctor'
+            specialisation=specialisation_instance # Assign the Specialisation instance
         )
+
         # Set password
         custom_user.set_password(password)
         custom_user.save()
@@ -51,26 +62,18 @@ class DocSignupView(APIView):
         experience_certificate_file = request.FILES.get('experience_certificate')
         mbbs_certificate_file = request.FILES.get('mbbs_certificate')
         if experience_certificate_file and mbbs_certificate_file:
-            document = Document.objects.create(
+            Document.objects.create(
                 user=custom_user,
                 experience_certificate=experience_certificate_file,
                 mbbs_certificate=mbbs_certificate_file
             )
         else:
-            # Handle case where one or both files are missing
             return Response({'error': 'Both experience certificate and MBBS certificate are required'}, status=status.HTTP_400_BAD_REQUEST)
+        sent_otp_email(email)
+        return Response({'message': 'Signup successful'}, status=status.HTTP_201_CREATED)
+    
 
-        serializer=CustomUserSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            sent_otp_email(serializer.data['email'])
-            return Response({'message': 'Registration successful. Please check your email for OTP verification.', 'data': serializer.data}, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        
-
-
-        
+    
 class Verify_Otp(APIView):
     def post(self, request):
         email = request.data.get('email')
@@ -87,7 +90,7 @@ class Verify_Otp(APIView):
         
         if serializer.is_valid():
             user = CustomUser.objects.get(email=email)
-            send_mail_func(serializer.data['email'])
+            send_mail_func_to_doc(serializer.data['email'])
 
             if not user:
                 return Response({'error': 'User not found'}, status=status.HTTP_400_BAD_REQUEST)

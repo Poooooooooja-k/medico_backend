@@ -34,10 +34,7 @@ def is_valid_email(email):
     
 
 def send_mail_func(email):
-    print("task Started")
-    print(email)
     users = CustomUser.objects.filter(is_superuser=False).order_by('-id').first()
-    print(users)
     if users:
         Subject = "Welcome to Medico"
         message = f"Hii {users.first_name} thanks for signing up on Medico "

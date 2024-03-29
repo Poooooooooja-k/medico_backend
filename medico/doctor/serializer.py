@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, Document
-
+from .models import CustomUser, Document,Specialisation
 
 class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -12,10 +11,13 @@ class CustomUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)  # For password field
     confirm_password = serializers.CharField(write_only=True)  # For confirm_password field
     document = DocumentSerializer(required=True)
+    new_specialisation = serializers.CharField(write_only=True, required=False)
+
+
 
     class Meta:
         model=CustomUser
-        fields = ['id', 'email', 'first_name', 'last_name', 'place', 'phone_number', 'age', 'exp', 'specialisation', 'is_active', 'is_staff', 'date_joined', 'role','password','document','confirm_password']
+        fields = ['id', 'email', 'first_name', 'last_name', 'place', 'phone_number', 'age', 'exp', 'specialisation', 'is_active', 'is_staff', 'date_joined', 'role','password','document','confirm_password','new_specialisation']
         read_only_fields = ['id', 'is_active', 'is_staff', 'date_joined']
 
 
@@ -30,6 +32,13 @@ class CustomUserSerializer(serializers.ModelSerializer):
         if password != confirm_password:
             raise serializers.ValidationError("Passwords do not match")
 
+        # Extract new specialization input
+        new_specialisation = validated_data.pop('new_specialisation', None)
+        if new_specialisation:
+            # Create new specialization if provided
+            specialization = Specialisation.objects.create(name=new_specialisation)
+            validated_data['specialisation'] = specialization.name
+
         # Create the user
         user = CustomUser.objects.create(**validated_data)
         # Set password
@@ -40,6 +49,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         Document.objects.create(user=user, **document_data)
 
         return user
+
 
 class VerifyUserSerializer(serializers.Serializer):
     email = serializers.EmailField()

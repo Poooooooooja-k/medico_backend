@@ -3,8 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser
-from .models import specialisation
-from .models import CustomUser
+from patient.models import CustomUser,Specialisation
 from patient.serializer import *
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -106,7 +105,7 @@ class AddSpecialisation(APIView):
 #     serializer_class = SpecialisationSerializer
     
 class SpecialisationViewSet(ModelViewSet):
-    queryset = specialisation.objects.all()
+    queryset = Specialisation.objects.all()
     serializer_class = SpecialisationSerializer
 
 # class SpecialisationListDetail(RetrieveAPIView):

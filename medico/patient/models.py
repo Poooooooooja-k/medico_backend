@@ -26,7 +26,13 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("Superuser must have is_superuser=True")
         return self.create_user(email,password,**extra_fields)
     
+class Specialisation(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    is_active = models.BooleanField(default=True)
 
+    def __str__(self):
+        return self.name
+    
     
 class CustomUser(AbstractBaseUser,PermissionsMixin):
     ROLE_CHOICES = (
@@ -37,10 +43,10 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     first_name=models.CharField(max_length=30,blank=True)
     last_name=models.CharField(max_length=30,blank=True)
     place=models.CharField(max_length=30,blank=True)
-    phone_number=models.CharField(max_length=15,blank=True)
-    age = models.IntegerField(blank=True, null=True)
-    exp = models.IntegerField(default=0,blank=True)
-    specialisation = models.CharField(max_length=100, blank=True)
+    phone_number = models.CharField(max_length=15, blank=True) 
+    age = models.IntegerField(blank=True,null=True) 
+    exp = models.IntegerField(blank=True,null=True)  
+    specialisation = models.ForeignKey(Specialisation, on_delete=models.SET_NULL, null=True, blank=True)
     is_active=models.BooleanField(default=True)
     is_staff=models.BooleanField(default=False)
     date_joined=models.DateTimeField(default=timezone.now)
@@ -72,13 +78,9 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
         return self.email
 
 class Document(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name='doc_image')
     experience_certificate = models.ImageField(upload_to='documents/')
     mbbs_certificate = models.ImageField(upload_to='documents/')
     # Add more fields for other certificates/documents as needed
 
 
-class specialisation(models.Model):
-    name=models.ForeignKey(' CustomUser',on_delete=models.CASCADE)
-    is_active=models.BooleanField(default=True)
-    

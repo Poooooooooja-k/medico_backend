@@ -31,7 +31,7 @@ urlpatterns = [
     path('doctor/', include('doctor.urls')),  
     path('patient/', include('patient.urls')),  
     path('adminn/', include('adminn.urls')), 
-    path('auth/', include('djoser.urls')),
-    path('auth/', include('djoser.urls.jwt')), 
-    path('auth/',include('djoser.social.urls')),
+    # path('auth/', include('djoser.urls')),
+    # path('auth/', include('djoser.urls.jwt')), 
+    # path('auth/',include('djoser.social.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

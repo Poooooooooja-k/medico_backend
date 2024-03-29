@@ -32,12 +32,8 @@ def is_valid_email(email):
     else:
         return False
     
-
-def send_mail_func(email):
-    print("task Started")
-    print(email)
+def send_mail_func_to_doc(email):
     users = CustomUser.objects.filter(is_superuser=False).order_by('-id').first()
-    print(users)
     if users:
         Subject = "Welcome to Medico"
         message = f"Hii {users.first_name} Thank you for signing up on Medico.Your Account is now on verification. After verification we'll sent you a confirmation mail.Then you account will be activated. "
