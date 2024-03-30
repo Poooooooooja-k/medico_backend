@@ -20,12 +20,11 @@ class DocSignupView(APIView):
         last_name = data.get('last_name')
         email = data.get('email')
         phone_number = data.get('phone_number')
-        specialisation_id = data.get('specialisation')
-        new_specialisation = data.get('new_specialisation')
+        specialisation = data.get('specialisation')
         exp = data.get('exp')
         password = data.get('password')
         confirm_password = data.get('confirm_password')
-        print(new_specialisation,".........newspecialization.................")
+
         # Check if passwords match
         if password != confirm_password:
             return Response({'error': 'Passwords do not match'}, status=status.HTTP_400_BAD_REQUEST)
@@ -33,17 +32,8 @@ class DocSignupView(APIView):
         # Check if email already exists
         if CustomUser.objects.filter(email=email).exists():
             return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # # Handle new specialisation
-        # if specialisation_id == 'other' and new_specialisation:
-        #     specialisation_instance, created = Specialisation.objects.get_or_create(name=new_specialisation)
-        # else:
-        #     # Existing logic to get specialization by ID
-        specialisation_instance = Specialisation.objects.get(id=specialisation_id)
-        return Response({'error': 'Specialisation does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
-
-        # Create CustomUser instance
+        # Create CustomUser instance first
         custom_user = CustomUser.objects.create(
             email=email,
             first_name=first_name,
@@ -51,12 +41,18 @@ class DocSignupView(APIView):
             phone_number=phone_number,
             exp=exp,
             role='doctor', # Set role to 'doctor'
-            specialisation=specialisation_instance # Assign the Specialisation instance
+            is_approved=False 
         )
 
         # Set password
         custom_user.set_password(password)
         custom_user.save()
+
+        # Now create the DocSpecialisation instance and associate it with the CustomUser instance
+        specialisation_instance, created = DocSpecialisation.objects.get_or_create(
+        name=specialisation,
+        defaults={'is_active': True, 'user': custom_user} # Associate with the CustomUser instance
+        )
 
         # Create Document instance with uploaded files
         experience_certificate_file = request.FILES.get('experience_certificate')
@@ -69,8 +65,10 @@ class DocSignupView(APIView):
             )
         else:
             return Response({'error': 'Both experience certificate and MBBS certificate are required'}, status=status.HTTP_400_BAD_REQUEST)
+
         sent_otp_email(email)
         return Response({'message': 'Signup successful'}, status=status.HTTP_201_CREATED)
+
     
 
     
@@ -121,11 +119,10 @@ class DocLogin(APIView):
             raise AuthenticationFailed({'error': 'Incorrect email or password!'}, status=status.HTTP_401_UNAUTHORIZED)
 
         if not user.is_active:
-            raise AuthenticationFailed({'error': 'User account is inactive!'}, status=status.HTTP_401_UNAUTHORIZED)
-            
+            raise AuthenticationFailed({'error': 'User account is inactive!'}, status=status.HTTP_401_UNAUTHORIZED)      
         if not user.is_approved:
-            return Response({'error': 'Doctor account not approved yet.'}, status=status.HTTP_403_FORBIDDEN)
-
+            return Response({'error': 'Doctor account not approved yet. Please wait for approval.'}, status=status.HTTP_403_FORBIDDEN)
+        
          # Generate JWT token
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)

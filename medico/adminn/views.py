@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser
-from patient.models import CustomUser,Specialisation
+from patient.models import CustomUser,DocSpecialisation
 from patient.serializer import *
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -105,9 +105,17 @@ class AddSpecialisation(APIView):
 #     serializer_class = SpecialisationSerializer
     
 class SpecialisationViewSet(ModelViewSet):
-    queryset = Specialisation.objects.all()
+    queryset = DocSpecialisation.objects.all()
     serializer_class = SpecialisationSerializer
 
 # class SpecialisationListDetail(RetrieveAPIView):
 #     queryset = specialisation.objects.all()
 #     serializer_class = SpecialisationSerializer
+    
+
+class DoctorListView(APIView):
+    def get(self, request):
+        doctors = CustomUser.objects.filter(role='doctor', is_staff=False)
+        serializer = DoctorSerializer(doctors, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    

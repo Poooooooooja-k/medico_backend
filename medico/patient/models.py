@@ -26,12 +26,7 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("Superuser must have is_superuser=True")
         return self.create_user(email,password,**extra_fields)
     
-class Specialisation(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    is_active = models.BooleanField(default=True)
 
-    def __str__(self):
-        return self.name
     
     
 class CustomUser(AbstractBaseUser,PermissionsMixin):
@@ -46,7 +41,8 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     phone_number = models.CharField(max_length=15, blank=True) 
     age = models.IntegerField(blank=True,null=True) 
     exp = models.IntegerField(blank=True,null=True)  
-    specialisation = models.ForeignKey(Specialisation, on_delete=models.SET_NULL, null=True, blank=True)
+    # specialisation = models.ForeignKey(Specialisation, on_delete=models.SET_NULL, null=True, blank=True)
+    specialisation = models.CharField(max_length=100, blank=True, null=True)
     is_active=models.BooleanField(default=True)
     is_staff=models.BooleanField(default=False)
     date_joined=models.DateTimeField(default=timezone.now)
@@ -78,9 +74,15 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
         return self.email
 
 class Document(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name='doc_image')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     experience_certificate = models.ImageField(upload_to='documents/')
     mbbs_certificate = models.ImageField(upload_to='documents/')
     # Add more fields for other certificates/documents as needed
 
+class DocSpecialisation(models.Model):
+    name = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.name

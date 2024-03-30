@@ -191,10 +191,10 @@ REST_FRAMEWORK = {
     ),
 }
 
-AUTHENTICATION_BACKENDS={
-    'social_core.backends.google.GoogleAuthz',
-    'django.contrib.auth.backends.ModelBackend'
-}
+# AUTHENTICATION_BACKENDS={
+#     'social_core.backends.google.GoogleAuthz',
+#     'django.contrib.auth.backends.ModelBackend'
+# }
 
 SIMPLE_JWT={
     'ACCESS_TOKEN_LIFETIME':timedelta(minutes=30),
