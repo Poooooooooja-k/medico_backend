@@ -49,8 +49,7 @@ INSTALLED_APPS = [
     'patient',
     'doctor',
     'adminn',
-    # 'social_django',
-    # 'rest_framework_simplejwt',
+    'rest_framework_simplejwt',
     # 'rest_framework_simplejwt.token_blacklist',
 ]
 AUTH_USER_MODEL='patient.CustomUser'

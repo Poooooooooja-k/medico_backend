@@ -49,6 +49,7 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='patient')
     is_approved = models.BooleanField(default=False)
     otp = models.CharField(max_length=6, null=True, blank=True)
+    deleted=models.BooleanField(default=False)
 
     
     objects=CustomUserManager()
@@ -82,7 +83,13 @@ class Document(models.Model):
 class DocSpecialisation(models.Model):
     name = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,null=True,blank=True)
 
     def __str__(self):
         return self.name
+
+class BlogPost(models.Model):
+    title=models.CharField(max_length=500)
+    article = models.FileField(upload_to='blogpost/', null=True, blank=True)
+    video = models.FileField(upload_to='blogpost/', null=True, blank=True)
+

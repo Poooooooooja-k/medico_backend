@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from patient.models import CustomUser, Document,DocSpecialisation
-
+from patient.models import CustomUser, Document,DocSpecialisation,BlogPost
+from patient.serializer import CustomUserSerializer
 
 class AdminSerializer(serializers.ModelSerializer):
     class Meta:
@@ -40,4 +40,14 @@ class DoctorSerializer(serializers.ModelSerializer):
 class SpecialisationSerializer(serializers.ModelSerializer):
     class Meta:
         model=DocSpecialisation
+        fields='__all__'
+        read_only_fields = ('is_active', 'user_id')
+        depth=1
+        # extra_kwargs={
+        #     'password':{'write_only':True}
+        # }
+
+class BlogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=BlogPost
         fields='__all__'

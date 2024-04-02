@@ -114,12 +114,17 @@ class DocLogin(APIView):
             return Response({
                 'error':'Email and password is required!!'
             })
-        user=CustomUser.objects.filter(email=email)
-        if user is None or not user.check_password(password):
-            raise AuthenticationFailed({'error': 'Incorrect email or password!'}, status=status.HTTP_401_UNAUTHORIZED)
+        try:
+            user = CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
+        if not user.check_password(password):
+            return Response({'error': 'Incorrect email or password!'}, status=status.HTTP_401_UNAUTHORIZED)
+        
         if not user.is_active:
-            raise AuthenticationFailed({'error': 'User account is inactive!'}, status=status.HTTP_401_UNAUTHORIZED)      
+            return Response({'error': 'User account is inactive!'}, status=status.HTTP_401_UNAUTHORIZED)      
+        
         if not user.is_approved:
             return Response({'error': 'Doctor account not approved yet. Please wait for approval.'}, status=status.HTTP_403_FORBIDDEN)
         
