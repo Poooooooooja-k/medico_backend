@@ -84,6 +84,7 @@ class Verify_Otp(APIView):
             return Response({'error': 'Please enter OTP!'}, status=status.HTTP_400_BAD_REQUEST)
         
         data = {'email': email, 'otp': otp}
+        print(data,"--------------data-----------------")
         serializer = VerifyUserSerializer(data=data)
         
         if serializer.is_valid():

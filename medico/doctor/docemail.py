@@ -13,13 +13,11 @@ def sent_otp_email(email):
         print("............",otp)
         message = f'Your OTP is: {otp}'
         from_email = settings.EMAIL_HOST_USER 
-        print(from_email,"testinmg from email>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
         send_mail(subject, message, from_email, [email])
         # Update user object with OTP
         user_obj = CustomUser.objects.get(email=email)
         user_obj.otp = otp
         print(user_obj.otp,"....................")
-        print("kkkkkkk",user_obj)
         user_obj.save()     
         print("OTP email sent successfully")
     except Exception as e:
