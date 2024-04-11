@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, Document
+from .models import CustomUser, Document,TimeSlot,DocSpecialisation,BlogPost
 
 class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,12 +32,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
         if password != confirm_password:
             raise serializers.ValidationError("Passwords do not match")
 
-        # Extract new specialization input
-        # new_specialisation = validated_data.pop('new_specialisation', None)
-        # if new_specialisation:
-        #     # Create new specialization if provided
-        #     specialization = Specialisation.objects.create(name=new_specialisation)
-        #     validated_data['specialisation'] = specialization.name
 
         # Create the user
         user = CustomUser.objects.create(**validated_data)
@@ -50,7 +44,32 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
         return user
 
+class SpecialisationSerializer(serializers.Serializer):
+    class Meta:
+        model=DocSpecialisation
+        fields='__all__'
 
 class VerifyUserSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField()
+
+
+class DoctorProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'email', 'specialisation', 'phone_number', 'exp','profile_image']
+
+class UpdateProfileImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['profile_image']
+
+class TimeSlotSerializer(serializers.ModelSerializer):
+   class Meta:
+       model=TimeSlot
+       fields='__all__'
+
+class DocBlogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=BlogPost
+        fields='__all__'

@@ -2,17 +2,20 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions,status
 from .serializer import *
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
+from rest_framework import generics
 from .docemail import *
 from rest_framework.exceptions import ValidationError,AuthenticationFailed
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.conf import settings
 from rest_framework.parsers import MultiPartParser, FormParser
-
+from django.http import QueryDict
+import json
 
 class DocSignupView(APIView):
     parser_classes = (MultiPartParser, FormParser)
-
     def post(self, request):
         data = request.data
         # Extract data from request
@@ -38,6 +41,7 @@ class DocSignupView(APIView):
             email=email,
             first_name=first_name,
             last_name=last_name,
+            specialisation=specialisation,
             phone_number=phone_number,
             exp=exp,
             role='doctor', # Set role to 'doctor'
@@ -130,8 +134,91 @@ class DocLogin(APIView):
             return Response({'error': 'Doctor account not approved yet. Please wait for approval.'}, status=status.HTTP_403_FORBIDDEN)
         
          # Generate JWT token
-        refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
-        
-        return Response({'access_token': access_token}, status=status.HTTP_200_OK)
+        refresh = RefreshToken.for_user(user)       
+        return Response({'access_token': str(refresh.access_token), 'refresh': str(refresh)}, status=status.HTTP_200_OK)
 
+class DoctorProfileAPIView(generics.RetrieveAPIView):
+    serializer_class = DoctorProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user # Access the authenticated user directly
+        serializer = DoctorProfileSerializer(user)  # Serialize the user data
+        return Response(serializer.data)
+    
+class UpdateProfileImageView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+
+    def put(self, request, *args, **kwargs):
+        print("--------------")
+        profile_image=request.FILES.get('profile_image')
+        print("------",request.data)
+        serializer = UpdateProfileImageSerializer(request.user, data=request.data)
+        print(serializer.is_valid())
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            print("error",serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    def get(self, request, *args, **kwargs):
+        return Response("GET request is allowed.")
+        
+# class TimeSlotCreate(APIView):
+#     permission_classes = [IsAuthenticated]
+#     def post(self, request):
+#         # Convert request.data to a mutable dictionary if necessary
+#         data = request.data
+#         print(data,"-------------------")
+        
+#         user = request.user
+#         print(user, '---')
+#         print(user.id,"===")
+        
+#         # Retrieve the authenticated doctor's ID from the request user
+#         user = CustomUser.objects.get(email=user)
+#         if user:
+#             # If the user object is retrieved successfully, get the ID of the user
+#             user_id = user.id
+#             # Add the 'Doctor' key to the data dictionary
+#             # data['Doctor'] = user_id
+        
+#         serializer = TimeSlotSerializer(data=data)
+#         print(serializer,"---ser----")
+#         print(serializer.is_valid())
+#         if serializer.is_valid():
+#             serializer.save(Doctor=user_id)
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         else:
+#             print(serializer.errors,"---")
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class TimeSlotCreate(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, format=None):
+        data = request.data
+        print("==",data)
+        serializer = TimeSlotSerializer(data=data)
+        doctor = request.user.id
+        print('id',doctor)
+        if serializer.is_valid():
+            serializer.save(Doctor=request.user)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        else:
+            print(serializer.errors)
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+class DocBlogAdd(APIView):
+     def post(self,request):
+        serializer=DocBlogSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+     
+class DocViewPost(APIView):
+      def get(self, request):
+        blogs = BlogPost.objects.all()
+        serializer = DocBlogSerializer(blogs, many=True)
+        return Response(serializer.data)

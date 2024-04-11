@@ -50,6 +50,7 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     is_approved = models.BooleanField(default=False)
     otp = models.CharField(max_length=6, null=True, blank=True)
     deleted=models.BooleanField(default=False)
+    profile_image=models.ImageField(blank=True,upload_to='profilepic/')
 
     
     objects=CustomUserManager()
@@ -93,3 +94,10 @@ class BlogPost(models.Model):
     article = models.FileField(upload_to='blogpost/', null=True, blank=True)
     video = models.FileField(upload_to='blogpost/', null=True, blank=True)
 
+class TimeSlot(models.Model):
+    Doctor= models.ForeignKey(CustomUser, on_delete=models.CASCADE,null=True,blank=True)
+    start_time = models.TimeField()
+    date = models.DateField(null=True,blank=True)
+    available = models.BooleanField(default=True,null=True)
+
+    

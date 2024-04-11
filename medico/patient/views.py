@@ -4,8 +4,10 @@ from rest_framework.exceptions import ValidationError,AuthenticationFailed
 from .serializer import *
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import *
+from rest_framework import generics
 from .email import *
 from rest_framework import permissions,status
+from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from django.contrib.auth import logout
 
@@ -80,17 +82,20 @@ class PatientLogin(APIView):
         if not user.check_password(password):
             raise AuthenticationFailed({'error':'Incorrect password!!'})
 
-        refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
-        
-        return Response({'access_token': access_token}, status=status.HTTP_200_OK)
+        refresh = RefreshToken.for_user(user)  
+        return Response({'access_token': str(refresh.access_token), 'refresh': str(refresh)}, status=status.HTTP_200_OK)
+
+
+class PatientProfile(generics.RetrieveAPIView):
+    serializer=ProfileSerializer()
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request):
+        user=request.user
+        serializer=ProfileSerializer(user)
+        return Response(serializer.data)
     
-class patientLogout(APIView):
-    def post(self,request):
-        response=Response()
-        response.delete_cookie('jwt')
-        response.data={
-            'message':'success'
-        }
-        return response
-            
+    
+class DoctorList(generics.ListAPIView):
+    queryset = CustomUser.objects.filter(role='doctor', is_approved=True)  # Filter doctors who are approved
+    serializer_class = DoctorSerializer

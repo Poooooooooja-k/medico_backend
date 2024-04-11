@@ -19,9 +19,22 @@ class CustomUserSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-
-    
-
 class VerifyUserSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField()
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:CustomUser
+    fields=['id','email','first_name','last_name','phone_number','place','age']
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser 
+        fields = ['email', 'first_name', 'last_name', 'phone_number', 'place', 'age']
+
+
+class DoctorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'phone_number','exp', 'specialisation', 'profile_image']

@@ -192,12 +192,12 @@ class ViewPost(APIView):
         serializer = BlogSerializer(blogs, many=True)
         return Response(serializer.data)
 
-class AdminLogout(APIView):
- def post(self,request):
-    response=Response()
-    response.delete_cookie('jwt')
-    response.data={
-        'message':'success'
-            }
-    return response
+# class AdminLogout(APIView):
+#  def post(self,request):
+#     response=Response()
+#     response.delete_cookie('jwt')
+#     response.data={
+#         'message':'success'
+#             }
+#     return response
                 
