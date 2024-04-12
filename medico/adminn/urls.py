@@ -24,5 +24,7 @@ urlpatterns = [
    path('doctorlist/',DoctorListView.as_view()),
    path('addblog/',AddPost.as_view()),
    path('adminviewpost/',ViewPost.as_view()),
+   path('admindoctorblogview/', ViewDoctorblog.as_view()),
+   path('adminapprovedoctorblog/',ApproveDoctorBlog.as_view()),
    path('', include(router.urls)),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -165,34 +165,6 @@ class UpdateProfileImageView(APIView):
     def get(self, request, *args, **kwargs):
         return Response("GET request is allowed.")
         
-# class TimeSlotCreate(APIView):
-#     permission_classes = [IsAuthenticated]
-#     def post(self, request):
-#         # Convert request.data to a mutable dictionary if necessary
-#         data = request.data
-#         print(data,"-------------------")
-        
-#         user = request.user
-#         print(user, '---')
-#         print(user.id,"===")
-        
-#         # Retrieve the authenticated doctor's ID from the request user
-#         user = CustomUser.objects.get(email=user)
-#         if user:
-#             # If the user object is retrieved successfully, get the ID of the user
-#             user_id = user.id
-#             # Add the 'Doctor' key to the data dictionary
-#             # data['Doctor'] = user_id
-        
-#         serializer = TimeSlotSerializer(data=data)
-#         print(serializer,"---ser----")
-#         print(serializer.is_valid())
-#         if serializer.is_valid():
-#             serializer.save(Doctor=user_id)
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         else:
-#             print(serializer.errors,"---")
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class TimeSlotCreate(APIView):
     permission_classes = [IsAuthenticated]
@@ -211,14 +183,19 @@ class TimeSlotCreate(APIView):
 
 class DocBlogAdd(APIView):
      def post(self,request):
-        serializer=DocBlogSerializer(data=request.data)
+        data=request.data
+        print(data,"--------data---------")
+        serializer=DocBlogSerializer(data=data)
+        print(serializer,"------ser----------")
         if serializer.is_valid():
+            print(serializer.is_valid(),"-------isvalios---------------")
             serializer.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
      
 class DocViewPost(APIView):
       def get(self, request):
-        blogs = BlogPost.objects.all()
+        blogs = BlogPost.objects.filter(is_verified=True)
         serializer = DocBlogSerializer(blogs, many=True)
         return Response(serializer.data)
+      

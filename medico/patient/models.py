@@ -48,6 +48,7 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     date_joined=models.DateTimeField(default=timezone.now)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='patient')
     is_approved = models.BooleanField(default=False)
+    is_rejected=models.BooleanField(default=False)
     otp = models.CharField(max_length=6, null=True, blank=True)
     deleted=models.BooleanField(default=False)
     profile_image=models.ImageField(blank=True,upload_to='profilepic/')
@@ -91,8 +92,11 @@ class DocSpecialisation(models.Model):
 
 class BlogPost(models.Model):
     title=models.CharField(max_length=500)
+    blog_content=models.CharField(max_length=500,null=True)
     article = models.FileField(upload_to='blogpost/', null=True, blank=True)
     video = models.FileField(upload_to='blogpost/', null=True, blank=True)
+    created_by=models.CharField(max_length=100,default='admin@medico')
+    is_verified=models.BooleanField(default=True)
 
 class TimeSlot(models.Model):
     Doctor= models.ForeignKey(CustomUser, on_delete=models.CASCADE,null=True,blank=True)

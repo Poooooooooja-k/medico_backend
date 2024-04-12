@@ -33,7 +33,7 @@ class DoctorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'first_name', 'last_name', 'email', 'phone_number', 'exp', 'role', 'is_approved', 'specialisation', 'doc_image']
+        fields = ['id', 'first_name', 'last_name', 'email', 'phone_number', 'exp', 'role', 'is_approved','is_rejected' ,'specialisation', 'doc_image']
 
 
 

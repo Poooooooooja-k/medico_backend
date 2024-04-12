@@ -46,7 +46,6 @@ class DoctorListView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class ApproveDoctorView(APIView):
-    # permission_classes = [IsAdminUser]
     def post(self, request):
         email = request.data.get('email')
 
@@ -69,15 +68,17 @@ class RejectDoctor(APIView):
         email = request.data.get('email')
         if not email:
             return Response({'error': 'Email field is required'}, status=status.HTTP_400_BAD_REQUEST)
-
         doctor = CustomUser.objects.filter(email=email, role='doctor').first()
         if not doctor:
             return Response({'error': 'Doctor not found'}, status=status.HTTP_404_NOT_FOUND)
-
         if doctor.is_approved:
             return Response({'error': 'Doctor is already approved'}, status=status.HTTP_400_BAD_REQUEST)
-
-        doctor.delete()
+        if doctor.is_rejected:
+            return Response({'error':'Doctor is already rejected'},status=status.HTTP_400_BAD_REQUEST)
+        
+        doctor.is_rejected = True
+        doctor.save()
+       
         return Response({'message': 'Doctor account rejected successfully'}, status=status.HTTP_200_OK)
 
     def get(self, request):
@@ -188,16 +189,33 @@ class AddPost(APIView):
 
 class ViewPost(APIView):
       def get(self, request):
-        blogs = BlogPost.objects.all()
+        blogs = BlogPost.objects.filter(is_verified=True)
         serializer = BlogSerializer(blogs, many=True)
         return Response(serializer.data)
 
-# class AdminLogout(APIView):
-#  def post(self,request):
-#     response=Response()
-#     response.delete_cookie('jwt')
-#     response.data={
-#         'message':'success'
-#             }
-#     return response
-                
+class ViewDoctorblog(APIView):
+    def get(self,request):
+        # blog = BlogPost.objects.exclude(created_by='admin@medico')
+        blog=BlogPost.objects.exclude(is_verified='True')
+        serializer=BlogSerializer(blog,many=True)
+        return Response(serializer.data)
+    
+
+class ApproveDoctorBlog(APIView):
+    def post(self,request):
+        data=request.data
+        print(data,"-----dta------------")
+        try:
+            blog_id=request.data.get('blog_id')
+            if not blog_id:
+               return Response({'error':'blog id is required!!'})
+
+            blog=BlogPost.objects.get(pk=blog_id)
+            blog.is_verified=True
+            blog.save()
+            return Response({'message':'Blog post approved successfully!!'})
+        except BlogPost.DoesNotExist:
+            return Response({'error':'Blog post not found'})
+        except Exception as e:
+            return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+       
