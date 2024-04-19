@@ -99,3 +99,41 @@ class PatientProfile(generics.RetrieveAPIView):
 class DoctorList(generics.ListAPIView):
     queryset = CustomUser.objects.filter(role='doctor', is_approved=True)  # Filter doctors who are approved
     serializer_class = DoctorSerializer
+
+class DoctorDetails(APIView):
+    def post(self,request):
+        doctor_id=request.data['doctor_id']
+        print(doctor_id,"-----------")
+        try:
+            doctor=CustomUser.objects.get(id=doctor_id,role='doctor')
+            serializer=DoctorSerializer(doctor)
+            return Response(serializer.data)
+        except:
+            return Response({'error':'doctor not found'},status=status.HTTP_400_BAD_REQUEST)
+
+class DocgetSlot(APIView):
+    def post(self, request):
+        data=request.data
+        print(data,"----------data---------------")
+        selected_date = request.data['selected_date']
+        doctor_id = request.data['doctor_id']
+
+        time_slots = TimeSlot.objects.filter(Doctor_id=doctor_id, date=selected_date, available=True)
+        serializer = TimeSlotSerializer(time_slots, many=True)
+        return Response({'time_slots': serializer.data}, status=status.HTTP_200_OK)
+
+class BookSlotAPIView(APIView):
+    def post(self, request, format=None):
+        patient=request.user
+        print(patient,"-------------")
+        user=CustomUser.objects.get(email=patient,role='patient')
+        patient_id=user.id 
+        print(patient_id,"-------id-------------")
+        data=request.data
+        data['patient']=str(patient_id)
+        print(data,'-----------data-------------')
+        serializer = SlotBookingSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

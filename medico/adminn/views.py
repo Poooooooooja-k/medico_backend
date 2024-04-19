@@ -219,3 +219,45 @@ class ApproveDoctorBlog(APIView):
         except Exception as e:
             return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
        
+
+class blogDelete(APIView):
+    def get(self,request,pk):
+        try:
+            blog=BlogPost.objects.get(pk=pk,is_active=True)
+            blog.is_active=False
+            blog.save()
+            return Response({'message':'Blog deactivated successfully!!'},status=status.HTTP_200_OK)
+        except BlogPost.DoesNotExist:
+            return Response({'error':'blog not found or already activated'},status=status.HTTP_400_BAD_REQUEST)
+
+class blogRestore(APIView):
+    def get(self,request,pk):
+        try:
+            blog=BlogPost.objects.get(pk=pk,is_active=False)
+            blog.is_active=True
+            blog.save()
+            return Response({'message':'blog restored successfully'},status=status.HTTP_200_OK)
+        except BlogPost.DoesNotExist:
+            return Response({'error':'error restoring blog'},status=status.HTTP_400_BAD_REQUEST)
+        
+
+class BlogEdit(APIView):
+    def get(self,request,pk):
+        try:
+            blog=BlogPost.objects.get(pk=pk)
+            serializer=BlogEditSerializer(blog)
+            return Response(serializer.data)
+        except BlogPost.DoesNotExist:
+            return Response({'error': 'Blog not found'}, status=status.HTTP_404_NOT_FOUND)
+    def patch(self,request,pk):
+        try:
+            blog=BlogPost.objects.get(pk=pk)
+            serializer = BlogEditSerializer(blog, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except BlogPost.DoesNotExist:
+            return Response({'error': 'Blog not found'}, status=status.HTTP_404_NOT_FOUND)
+

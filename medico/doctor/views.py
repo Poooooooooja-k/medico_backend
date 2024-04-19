@@ -199,3 +199,91 @@ class DocViewPost(APIView):
         serializer = DocBlogSerializer(blogs, many=True)
         return Response(serializer.data)
       
+class AddConsultationFee(APIView):
+    def post(self,request):
+        serializer = ConsultationFeeSerializer(request.user, data=request.data)
+        print(request.user,"--------userooooooooooo")
+        print(serializer,"----ser------------")
+        if serializer.is_valid():
+            print(serializer.is_valid(),"--------valid----------")
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+
+class DoctorDocumentsget(APIView):
+    def get(self, request):
+        try:
+            doctor = request.user
+            print(doctor,"-------------------")
+            documents = Document.objects.filter(user=doctor)
+            serializer = DocumentSerializer(documents, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+class GetTimeSlotsView(APIView):
+    def get(self, request, date):
+        try:
+            slots = TimeSlot.objects.filter(date=date, available=True)
+            times = [slot.start_time for slot in slots]
+            
+            # serializer=TimeSlotSerializer(data=slots,many=True)
+            # if serializer.is_valid():
+            return Response(times, status=status.HTTP_200_OK)
+        except TimeSlot.DoesNotExist:
+            return Response({'error': 'No time slots found for the given date.'}, status=status.HTTP_404_NOT_FOUND)
+        
+class DeleteSlot(APIView):
+    def post(self,request):
+        slot_id=request.data.get('slot_id')
+        print(slot_id,"-----------slotid--------------")
+        try:
+            slot=TimeSlot.objects.get(id=slot_id)
+            slot.delete()
+            return Response({'message':'slot deleted successfully!!'},status=status.HTTP_200_OK)
+        except TimeSlot.DoesNotExist:
+            return Response({'error':'time slot not found'},status=status.HTTP_400_BAD_REQUEST)
+            
+class DocblogDelete(APIView):
+    def get(self,request,pk):
+        try:
+            blog=BlogPost.objects.get(pk=pk,is_active=True)
+            blog.is_active=False
+            blog.save()
+            return Response({'message':'Blog deactivated successfully!!'},status=status.HTTP_200_OK)
+        except BlogPost.DoesNotExist:
+            return Response({'error':'blog not found or already activated'},status=status.HTTP_400_BAD_REQUEST)
+        
+
+class DocblogRestore(APIView):
+    def get(self,request,pk):
+        try:
+            blog=BlogPost.objects.get(pk=pk,is_active=False)
+            blog.is_active=True
+            blog.save()
+            return Response({'message':'blog restored successfully'},status=status.HTTP_200_OK)
+        except BlogPost.DoesNotExist:
+            return Response({'error':'error restoring blog'},status=status.HTTP_400_BAD_REQUEST)
+        
+
+class DocBlogEdit(APIView):
+    def get(self,request,pk):
+        try:
+            blog=BlogPost.objects.get(pk=pk)
+            serializer=DocBlogEditSerializer(blog)
+            return Response(serializer.data)
+        except BlogPost.DoesNotExist:
+            return Response({'error': 'Blog not found'}, status=status.HTTP_404_NOT_FOUND)
+    def patch(self,request,pk):
+        try:
+            blog=BlogPost.objects.get(pk=pk)
+            serializer = DocBlogEditSerializer(blog, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except BlogPost.DoesNotExist:
+            return Response({'error': 'Blog not found'}, status=status.HTTP_404_NOT_FOUND)

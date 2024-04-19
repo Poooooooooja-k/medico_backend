@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, Document
+from .models import CustomUser, Document,TimeSlot,SlotBooking
 
 class CustomUserSerializer(serializers.ModelSerializer):
     age = serializers.IntegerField(required=False)
@@ -37,4 +37,16 @@ class ProfileSerializer(serializers.ModelSerializer):
 class DoctorSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'phone_number','exp', 'specialisation', 'profile_image']
+        fields = ['id','first_name', 'last_name', 'phone_number','exp', 'specialisation', 'profile_image','consultation_fee']
+
+
+class TimeSlotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=TimeSlot
+        fields='__all__'
+
+
+class SlotBookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SlotBooking
+        fields = ['doctor', 'patient', 'date', 'start_time','timeslot', 'payment_completed']

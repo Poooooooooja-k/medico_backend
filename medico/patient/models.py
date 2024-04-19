@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager,PermissionsMixin
 from django.utils import timezone
+from django.core.validators import MaxValueValidator
 from datetime import date 
 
 
@@ -52,7 +53,7 @@ class CustomUser(AbstractBaseUser,PermissionsMixin):
     otp = models.CharField(max_length=6, null=True, blank=True)
     deleted=models.BooleanField(default=False)
     profile_image=models.ImageField(blank=True,upload_to='profilepic/')
-
+    consultation_fee = models.IntegerField(validators=[MaxValueValidator(2000)],null=True)
     
     objects=CustomUserManager()
 
@@ -97,6 +98,7 @@ class BlogPost(models.Model):
     video = models.FileField(upload_to='blogpost/', null=True, blank=True)
     created_by=models.CharField(max_length=100,default='admin@medico')
     is_verified=models.BooleanField(default=True)
+    is_active=models.BooleanField(default=True)
 
 class TimeSlot(models.Model):
     Doctor= models.ForeignKey(CustomUser, on_delete=models.CASCADE,null=True,blank=True)
@@ -104,4 +106,13 @@ class TimeSlot(models.Model):
     date = models.DateField(null=True,blank=True)
     available = models.BooleanField(default=True,null=True)
 
-    
+class SlotBooking(models.Model):
+    doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='doctor_bookings')
+    timeslot = models.ForeignKey(TimeSlot, on_delete=models.CASCADE)
+    patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='patient_bookings')
+    date = models.DateField()
+    start_time = models.TimeField()
+    payment_completed=models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Booking for {self.patient} with {self.doctor} at {self.start_time} on {self.date}"

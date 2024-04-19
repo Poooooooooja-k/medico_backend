@@ -57,7 +57,7 @@ class VerifyUserSerializer(serializers.Serializer):
 class DoctorProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'specialisation', 'phone_number', 'exp','profile_image']
+        fields = ['first_name', 'last_name', 'email', 'specialisation', 'phone_number', 'exp','profile_image','consultation_fee']
 
 class UpdateProfileImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -73,3 +73,13 @@ class DocBlogSerializer(serializers.ModelSerializer):
     class Meta:
         model=BlogPost
         fields='__all__'
+
+class ConsultationFeeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=CustomUser
+        fields=['consultation_fee']
+
+class DocBlogEditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=BlogPost
+        fields=['title','blog_content','article','created_by','video']

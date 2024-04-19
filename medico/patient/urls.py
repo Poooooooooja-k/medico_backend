@@ -9,4 +9,7 @@ urlpatterns = [
     path('patientlogin/',PatientLogin.as_view()),
     path('userprofile/',PatientProfile.as_view()),
     path('listdoctors/', DoctorList.as_view()),
+    path('getdocslots/', DocgetSlot.as_view()),
+    path('doctordetail/',DoctorDetails.as_view()),
+    path('bookslot/', BookSlotAPIView.as_view()),
 ]
