@@ -10,6 +10,7 @@ from rest_framework import permissions,status
 from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from django.contrib.auth import logout
+import razorpay
 
 class PatientSign(APIView):
     def post(self,request):
@@ -137,3 +138,32 @@ class BookSlotAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class patientPayment(APIView):
+    def post(self,request):
+        client = razorpay.Client(auth=(settings.RAZOR_PAY_KEY_ID, settings.KEY_SECRET))
+        doctor_id = request.data.get('doctor_id')
+        amount = request.data.get('amount')
+        consultation_date = request.data.get('consultation_date')
+         # Create booking with Razorpay
+        booking_data = {
+            'amount': amount * 100,  # Razorpay expects amount in paisa
+            'currency': 'INR',
+            'receipt': 'receipt_order_{}'.format(doctor_id),
+            'payment_capture': 1  # Auto-capture payment
+        }
+        order = client.order.create(data=booking_data)
+        data = {
+            'patient': request.user.id,  # Assuming user is authenticated and is a patient
+            'doctor': doctor_id,
+            'amount': amount,
+            'consultation_date': consultation_date,
+            'razorpay_order_id': order['id']  # Save Razorpay order ID for future reference
+        }
+        serializer = PaymentSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+

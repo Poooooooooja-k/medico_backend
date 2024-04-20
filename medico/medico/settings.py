@@ -206,6 +206,8 @@ SIMPLE_JWT={
 # SOCIAL_AUTH_GOOGLE_QAUTH2_EXTRA_DATA=['first_name','last_name']
 
 
+RAZOR_PAY_KEY_ID= 'rzp_test_PgZCwShrc9JIsA'
+KEY_SECRET  = 'cSOtTZNrI2xuxIMFK0Um5JI6'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, Document,TimeSlot,SlotBooking
+from .models import CustomUser,TimeSlot,SlotBooking,Payment
 
 class CustomUserSerializer(serializers.ModelSerializer):
     age = serializers.IntegerField(required=False)
@@ -23,7 +23,6 @@ class VerifyUserSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField()
 
-
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:CustomUser
     fields=['id','email','first_name','last_name','phone_number','place','age']
@@ -33,20 +32,22 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = CustomUser 
         fields = ['email', 'first_name', 'last_name', 'phone_number', 'place', 'age']
 
-
 class DoctorSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id','first_name', 'last_name', 'phone_number','exp', 'specialisation', 'profile_image','consultation_fee']
-
 
 class TimeSlotSerializer(serializers.ModelSerializer):
     class Meta:
         model=TimeSlot
         fields='__all__'
 
-
 class SlotBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = SlotBooking
         fields = ['doctor', 'patient', 'date', 'start_time','timeslot', 'payment_completed']
+
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = '__all__'

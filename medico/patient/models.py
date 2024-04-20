@@ -116,3 +116,13 @@ class SlotBooking(models.Model):
 
     def __str__(self):
         return f"Booking for {self.patient} with {self.doctor} at {self.start_time} on {self.date}"
+
+class Payment(models.Model):
+    patient = models.ForeignKey(SlotBooking, on_delete=models.CASCADE, related_name='payments')
+    doctor = models.ForeignKey(SlotBooking, on_delete=models.CASCADE, related_name='received_payments')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    consultation_date =models.ForeignKey(SlotBooking, on_delete=models.CASCADE)
+    payment_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Payment of {self.amount} made by {self.patient.email} to {self.doctor.email} on {self.payment_date}"

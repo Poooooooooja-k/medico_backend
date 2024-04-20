@@ -12,4 +12,5 @@ urlpatterns = [
     path('getdocslots/', DocgetSlot.as_view()),
     path('doctordetail/',DoctorDetails.as_view()),
     path('bookslot/', BookSlotAPIView.as_view()),
+    path('payment/',patientPayment.as_view()),
 ]
