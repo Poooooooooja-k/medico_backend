@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from django.contrib.auth import logout
 import razorpay
+client = razorpay.Client(auth=(settings.RAZOR_PAY_KEY_ID, settings.KEY_SECRET))
 
 class PatientSign(APIView):
     def post(self,request):
@@ -141,7 +142,6 @@ class BookSlotAPIView(APIView):
 
 class patientPayment(APIView):
     def post(self,request):
-        client = razorpay.Client(auth=(settings.RAZOR_PAY_KEY_ID, settings.KEY_SECRET))
         doctor_id = request.data.get('doctor_id')
         amount = request.data.get('amount')
         consultation_date = request.data.get('consultation_date')
@@ -153,17 +153,52 @@ class patientPayment(APIView):
             'payment_capture': 1  # Auto-capture payment
         }
         order = client.order.create(data=booking_data)
+        user=request.user
+        user=CustomUser.objects.get(email=user)
+        user_id=user.id
         data = {
-            'patient': request.user.id,  # Assuming user is authenticated and is a patient
+            'patient':user_id,  # Assuming user is authenticated and is a patient
             'doctor': doctor_id,
             'amount': amount,
             'consultation_date': consultation_date,
             'razorpay_order_id': order['id']  # Save Razorpay order ID for future reference
         }
-        serializer = PaymentSerializer(data=data)
+        # serializer = PaymentSerializer(data=data)
+        # if serializer.is_valid():
+        #     serializer.save()
+        return Response(data,status=status.HTTP_200_OK)
+        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class handlePaymentSuccess(APIView):
+    def post(self,request):
+        razorpay_payment_id = request.data['razorpay_payment_id']
+        razorpay_order_id = request.data['razorpay_order_id']
+        razorpay_signature = request.data['razorpay_signature']
+        doctor=request.data['doctor']
+        patient=request.data['patient']
+        date=request.data['consultation_date']
+        amount=request.data['amount']
+
+        data={
+            ' razorpay_payment_id ': razorpay_payment_id ,
+            ' razorpay_order_id': razorpay_order_id,
+            ' razorpay_signature ': razorpay_signature ,
+        }
+        check=client.utility.verify_payment_signature(data)
+        if check is None:
+            return Response({'error':'Error while payment'},status=status.HTTP_400_BAD_REQUEST)
+        details={
+            'doctor':doctor,
+            'patient':patient,
+            'consultation_date':date,
+            'amount':amount
+        }
+        serializer=PaymentSerializer(data=details)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data,status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data,{'message':'payment success'},status=status.HTTP_200_OK)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
