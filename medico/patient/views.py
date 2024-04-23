@@ -143,7 +143,7 @@ class BookSlotAPIView(APIView):
 class patientPayment(APIView):
     def post(self,request):
         doctor_id = request.data.get('doctor_id')
-        amount = request.data.get('amount')
+        amount = int(request.data.get('amount')) 
         consultation_date = request.data.get('consultation_date')
          # Create booking with Razorpay
         booking_data = {
@@ -156,18 +156,38 @@ class patientPayment(APIView):
         user=request.user
         user=CustomUser.objects.get(email=user)
         user_id=user.id
+        doctor_data=CustomUser.objects.get(id=doctor_id)
+        doc_serializer=DoctorSerializer(doctor_data)
+        patient_serializer=CustomUserSerializer(user)
         data = {
-            'patient':user_id,  # Assuming user is authenticated and is a patient
-            'doctor': doctor_id,
+            'patient':patient_serializer.data,  # Assuming user is authenticated and is a patient
+            'doctor': doc_serializer.data,
             'amount': amount,
             'consultation_date': consultation_date,
             'razorpay_order_id': order['id']  # Save Razorpay order ID for future reference
         }
+        print(data,"---paymentdta---------------")
+        
         # serializer = PaymentSerializer(data=data)
         # if serializer.is_valid():
         #     serializer.save()
         return Response(data,status=status.HTTP_200_OK)
         # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class getDetails(APIView):
+    def post(self,request):
+        user=request.user
+        doctor_id = request.data.get('doctor_id')
+        user=CustomUser.objects.get(email=user)
+        doctor_data=CustomUser.objects.get(id=doctor_id)
+        doc_serializer=DoctorSerializer(doctor_data)
+        patient_serializer=CustomUserSerializer(user)
+        data={
+            'patient':patient_serializer.data,
+            'doctor':doc_serializer.data
+        }
+        return Response(data)
+
 
 class handlePaymentSuccess(APIView):
     def post(self,request):

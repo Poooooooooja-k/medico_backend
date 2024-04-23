@@ -123,6 +123,7 @@ class Payment(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     consultation_date =models.ForeignKey(SlotBooking, on_delete=models.CASCADE)
     payment_date = models.DateTimeField(auto_now_add=True)
+    is_complete=models.BooleanField(default=False)
 
     def __str__(self):
         return f"Payment of {self.amount} made by {self.patient.email} to {self.doctor.email} on {self.payment_date}"
